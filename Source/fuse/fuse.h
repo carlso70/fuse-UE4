@@ -3,7 +3,7 @@
 #ifndef __FUSE_H__
 #define __FUSE_H__
 
-#include "EngineMinimal.h"
+#include "Engine.h"
 
 
 #endif
