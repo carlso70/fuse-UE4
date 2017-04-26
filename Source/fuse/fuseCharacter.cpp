@@ -7,6 +7,7 @@
 #include "GameFramework/InputSettings.h"
 #include "Kismet/HeadMountedDisplayFunctionLibrary.h"
 #include "MotionControllerComponent.h"
+#include "Target.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -157,7 +158,7 @@ void AfuseCharacter::OnFire()
 				ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
 				// spawn the projectile at the muzzle
-				World->SpawnActor<AfuseProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+				// World->SpawnActor<AfuseProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 			}
 		}
 	}
@@ -178,6 +179,26 @@ void AfuseCharacter::OnFire()
 			AnimInstance->Montage_Play(FireAnimation, 1.f);
 		}
 	}
+
+
+	FHitResult* HitResult = new FHitResult();
+	FVector StartTrace = FirstPersonCameraComponent->GetComponentLocation();
+	FVector ForwardVector = FirstPersonCameraComponent->GetForwardVector();
+	FVector EndTrace = ((ForwardVector * 2000.f) + StartTrace);
+	FCollisionQueryParams* TraceParams = new FCollisionQueryParams();
+
+	if (GetWorld()->LineTraceSingleByChannel(*HitResult, StartTrace, EndTrace, ECC_Visibility, *TraceParams))
+	{
+		DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Green, false, 5.f);
+
+		ATarget* TestTarget = Cast<ATarget>(HitResult->Actor.Get());
+
+		if (TestTarget != NULL && !TestTarget->IsPendingKill())
+		{
+			TestTarget->DamageTarget(50.f);
+		}
+	}
+
 }
 
 void AfuseCharacter::OnResetVR()
